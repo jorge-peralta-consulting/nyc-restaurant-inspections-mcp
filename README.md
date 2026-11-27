@@ -165,6 +165,12 @@ Code: `src/client.ts` (all SoQL queries), `src/tools.ts` (tools and output shapi
 `src/server.ts` (stdio entry point). Tests in `test/` use a fake `fetch` and invented data;
 run `npm run check` at the repository root.
 
+## Changes
+
+- 2026-11-27: dependency update: zod upgraded to 4.6.7 for security advisory
+  [GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5) (high). The tools, their
+  arguments and limits are unchanged.
+
 ## About
 
 Built by **[Jorge Peralta Consulting](https://github.com/jorge-peralta-consulting)** as a sample of the custom MCP servers I build for businesses: tested, documented and read-only by default.

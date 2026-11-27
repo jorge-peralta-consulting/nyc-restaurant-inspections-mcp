@@ -1,12 +1,15 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { test } from "node:test";
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const serverPath = fileURLToPath(new URL("../src/server.ts", import.meta.url));
+/** The input schemas clients see, recorded before the Zod 4 upgrade. They must not change. */
+const expectedSchemas = JSON.parse(readFileSync(new URL("./tool-schemas.json", import.meta.url), "utf8"));
 
 /** Start the real server over stdio, do the MCP handshake and list tools. No tool is called, so no network is used. */
-test("the server starts over stdio and lists its four tools", async () => {
+test("the server starts over stdio and lists its four tools with unchanged input schemas", async () => {
   const child = spawn(process.execPath, ["--import", "tsx", serverPath], {
     env: { ...process.env, NYCRI_BASE_URL: "https://soda.invalid/resource/", NYCRI_APP_TOKEN: "" },
     stdio: ["pipe", "pipe", "pipe"],
@@ -42,6 +45,7 @@ test("the server starts over stdio and lists its four tools", async () => {
     const names = list.result.tools.map((tool: { name: string }) => tool.name).sort();
     assert.deepEqual(names, ["get_inspection_history", "grade_summary", "recent_critical_violations", "search_restaurants"]);
     for (const tool of list.result.tools) assert.equal(tool.annotations.readOnlyHint, true);
+    for (const tool of list.result.tools) assert.deepEqual(tool.inputSchema, expectedSchemas[tool.name], tool.name);
   } finally {
     child.kill();
   }
