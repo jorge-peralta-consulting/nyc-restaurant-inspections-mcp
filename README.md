@@ -176,3 +176,6 @@ Not affiliated with or endorsed by the NYC Department of Health and Mental Hygie
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+[![M8ven Score](https://m8ven.ai/badge/mcp/jorge-peralta-consulting-nyc-restaurant-inspections-mcp-a9x3ae?v=ca978adac1a70bfcbd2ece128ed7f77e)](https://m8ven.ai/mcp/jorge-peralta-consulting-nyc-restaurant-inspections-mcp-a9x3ae?s=readme)
+
