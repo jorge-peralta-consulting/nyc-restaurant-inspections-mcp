@@ -1,0 +1,126 @@
+{
+  "search_restaurants": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 100,
+        "description": "Part of the restaurant's name, e.g. 'joe's pizza' (case-insensitive)"
+      },
+      "borough": {
+        "type": "string",
+        "enum": [
+          "Manhattan",
+          "Bronx",
+          "Brooklyn",
+          "Queens",
+          "Staten Island"
+        ],
+        "description": "NYC borough: Manhattan, Bronx, Brooklyn, Queens or Staten Island"
+      },
+      "zip": {
+        "type": "string",
+        "pattern": "^\\d{5}$",
+        "description": "5-digit NYC ZIP code, e.g. 10012"
+      },
+      "cuisine": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 60,
+        "description": "Part of the cuisine as NYC records it, e.g. 'Italian', 'Pizza', 'Chinese', 'Coffee/Tea'"
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100,
+        "default": 20,
+        "description": "Maximum number of restaurants to return (1-100, default 20)"
+      }
+    },
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  },
+  "get_inspection_history": {
+    "type": "object",
+    "properties": {
+      "restaurant_id": {
+        "type": "string",
+        "pattern": "^\\d{1,10}$",
+        "description": "The restaurant_id (CAMIS number) from search_restaurants"
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100,
+        "default": 20,
+        "description": "Maximum number of inspections to return (1-100, default 20)"
+      }
+    },
+    "required": [
+      "restaurant_id"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  },
+  "recent_critical_violations": {
+    "type": "object",
+    "properties": {
+      "borough": {
+        "type": "string",
+        "enum": [
+          "Manhattan",
+          "Bronx",
+          "Brooklyn",
+          "Queens",
+          "Staten Island"
+        ],
+        "description": "NYC borough: Manhattan, Bronx, Brooklyn, Queens or Staten Island"
+      },
+      "zip": {
+        "type": "string",
+        "pattern": "^\\d{5}$",
+        "description": "5-digit NYC ZIP code, e.g. 10012"
+      },
+      "days": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 365,
+        "default": 30,
+        "description": "How many days back to look (1-365, default 30)"
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100,
+        "default": 20,
+        "description": "Maximum number of violations to return (1-100, default 20)"
+      }
+    },
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  },
+  "grade_summary": {
+    "type": "object",
+    "properties": {
+      "borough": {
+        "type": "string",
+        "enum": [
+          "Manhattan",
+          "Bronx",
+          "Brooklyn",
+          "Queens",
+          "Staten Island"
+        ],
+        "description": "NYC borough: Manhattan, Bronx, Brooklyn, Queens or Staten Island"
+      },
+      "zip": {
+        "type": "string",
+        "pattern": "^\\d{5}$",
+        "description": "5-digit NYC ZIP code, e.g. 10012"
+      }
+    },
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

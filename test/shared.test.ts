@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { z } from "zod";
 import { ConfigError, HttpClient, HttpError, buildServer, loadConfig, redact, runTool } from "../src/shared/index.ts";
 
 test("loadConfig returns required and optional values", () => {
@@ -69,4 +72,40 @@ test("buildServer hides write tools in read-only mode", () => {
   ];
   assert.deepEqual(buildServer({ name: "t", version: "0", tools }).registered, ["list_things", "create_thing"]);
   assert.deepEqual(buildServer({ name: "t", version: "0", tools, readOnly: true }).registered, ["list_things"]);
+});
+
+test("buildServer publishes strict input schemas, applies defaults and strips unknown arguments", async () => {
+  let received: unknown;
+  const tools = [{
+    name: "list_things",
+    description: "List",
+    input: {
+      status: z.enum(["open", "closed"]).optional().describe("Status filter"),
+      limit: z.number().int().min(1).max(100).default(25).describe("Maximum number"),
+    },
+    handler: async (args: unknown) => { received = args; return []; },
+  }];
+  const { server } = buildServer({ name: "t", version: "0", tools });
+  const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+  const client = new Client({ name: "test", version: "0" });
+  await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+  try {
+    const { tools: listed } = await client.listTools();
+    assert.deepEqual(listed[0]!.inputSchema, {
+      $schema: "http://json-schema.org/draft-07/schema#",
+      type: "object",
+      properties: {
+        status: { type: "string", enum: ["open", "closed"], description: "Status filter" },
+        limit: { type: "integer", minimum: 1, maximum: 100, default: 25, description: "Maximum number" },
+      },
+      additionalProperties: false,
+    });
+    const result = await client.callTool({ name: "list_things", arguments: { status: "open", unknown: 1 } });
+    assert.equal(result.isError, undefined);
+    assert.deepEqual(received, { status: "open", limit: 25 });
+    const invalid = await client.callTool({ name: "list_things", arguments: { limit: 101 } });
+    assert.equal(invalid.isError, true);
+  } finally {
+    await client.close();
+  }
 });

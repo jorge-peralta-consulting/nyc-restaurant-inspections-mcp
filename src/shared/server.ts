@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import type { ZodRawShape } from "zod";
+import { z, type ZodRawShape } from "zod";
 import { runTool, type ToolResult } from "./result.ts";
 
 export interface ToolDefinition {
@@ -29,12 +29,21 @@ export function buildServer(definition: ConnectorDefinition): { server: McpServe
     if (definition.readOnly && tool.writes) continue;
     server.registerTool(
       tool.name,
-      { description: tool.description, inputSchema: tool.input, annotations: { readOnlyHint: !tool.writes } },
+      { description: tool.description, inputSchema: inputSchema(tool.input), annotations: { readOnlyHint: !tool.writes } },
       async (args: unknown): Promise<ToolResult> => runTool(() => tool.handler(args)),
     );
     registered.push(tool.name);
   }
   return { server, registered };
+}
+
+/**
+ * The tool's arguments as a Zod object. Unknown arguments are stripped, as before. Zod 4 leaves
+ * `additionalProperties: false` out of the JSON Schema it generates for tool inputs (Zod 3 put it in),
+ * so it is set explicitly to keep the schema that clients see unchanged.
+ */
+function inputSchema(shape: ZodRawShape) {
+  return z.object(shape).meta({ additionalProperties: false });
 }
 
 export async function startStdioServer(definition: ConnectorDefinition): Promise<void> {
